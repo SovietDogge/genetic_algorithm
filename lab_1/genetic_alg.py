@@ -1,4 +1,5 @@
 from collections import namedtuple
+from typing import List
 
 import numpy as np
 
@@ -25,16 +26,16 @@ def count_step(borders: Border, n: int, e: float = 0.1) -> float | None:
     return h if h <= e else None
 
 
-def generate_parents_population(points: np.array, winners: np.array) -> np.array:
+def generate_parents_population(points: np.array, winners: np.array, population: List[Person]):
     k = 0
-    result = np.zeros(MIN_PERSON_COUNT, dtype=int)
-
-    for i, _ in enumerate(result):
+    result = []
+    for i in range(0, MIN_PERSON_COUNT):
         for j in (range(k, MIN_PERSON_COUNT)):
             if winners[i] < points[j]:
                 break
 
-        result[i], k = int(j), j
+        result.append(population[i])
+        k = int(j)
 
     return result
 
@@ -78,24 +79,16 @@ def main():
             winners = rng.random(50) * 100
             winners.sort()
 
-            new_population_idx = generate_parents_population(circle, winners)
-            new_population_parents = [population[idx] for idx in new_population_idx]
-
-            for _ in (range(MIN_PERSON_COUNT // 2)):
-                idx1 = rng.choice(new_population_idx)
-                parent1 = new_population_parents.pop(idx1)
-                idx2 = rng.choice(new_population_idx)
-                parent2 = new_population_parents.pop(idx2)
-
-
-                # print(idx)
+            new_population_parents = generate_parents_population(circle, winners, population)
             k = rng.integers(0, min(l1, l2))
 
 
+
+
+
+        print(circle)
+        print(winners)
         print(new_population_parents)
-        # print(circle)
-        # print(winners)
-        # print(new_population_idx)
 
 
 if __name__ == '__main__':
