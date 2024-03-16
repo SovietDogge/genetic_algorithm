@@ -1,7 +1,7 @@
 class Chromosome:
     def __init__(self, value: int | str):
         if isinstance(value, str):
-            value = int(str(value), base=2)
+            value = int(''.join(value), base=2)
 
         self._encoded = value
         self._bin_encoded = str(bin(value))[2:]
@@ -19,12 +19,12 @@ class Chromosome:
         return len(self.bin_encoded)
 
     def cross(self, chromosome, k):
-        binary = str([self.bin_encoded[i] if i < k else chromosome.bin_encoded[i] for i in range(0, self.length)])
-        return Chromosome(binary)
+        binary = [self.bin_encoded[i] if i < k else chromosome.bin_encoded[i] for i in range(0, self.length)]
+        return Chromosome(''.join(binary))
 
     def rcross(self, chromosome, k):
-        binary = str([self.bin_encoded[i] if i > k else chromosome.bin_encoded[i] for i in range(0, self.length)])
-        return Chromosome(binary)
+        binary = [self.bin_encoded[i] if i > k else chromosome.bin_encoded[i] for i in range(0, self.length)]
+        return Chromosome(''.join(binary))
 
     def full_cross(self, chromosome, k):
         chr1 = self.cross(chromosome, k)

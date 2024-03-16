@@ -3,7 +3,7 @@ from typing import List
 
 import numpy as np
 
-from classes import Person, Chromosome
+from classes import Person, Chromosome, func
 
 rng = np.random.default_rng(12)
 
@@ -11,10 +11,6 @@ Border = namedtuple('Border', ('left', 'right'))
 
 MIN_ITER_COUNT = 500
 MIN_PERSON_COUNT = 50
-
-
-def func(x, y):
-    return abs(x) + y
 
 
 def count_length(borders: Border, q: int = 1) -> int:
@@ -53,7 +49,7 @@ def main():
 
     points = []
     while len(points) < MIN_PERSON_COUNT:
-        ind = Border(rng.uniform(-2, 4), rng.uniform(0, 4))
+        ind = Border(rng.uniform(a_b.left, a_b.right), rng.uniform(c_d.left, c_d.right))
         if ind not in points:
             points.append(ind)
 
@@ -80,15 +76,21 @@ def main():
             winners.sort()
 
             new_population_parents = generate_parents_population(circle, winners, population)
-            k = rng.integers(0, min(l1, l2))
+            rng.shuffle(new_population_parents)
 
+            new_population = []
+            k = rng.integers(1, min(l1, l2))
 
-
+            for i in range(0, MIN_PERSON_COUNT // 2):
+                parent1 = new_population_parents.pop(i)
+                parent2 = new_population_parents.pop(i+1)
+                new_population.extend(parent1.produce_new_people(parent2, k))
 
 
         print(circle)
         print(winners)
         print(new_population_parents)
+        print(new_population)
 
 
 if __name__ == '__main__':

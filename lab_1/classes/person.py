@@ -1,5 +1,7 @@
 from .chromosome import Chromosome
 
+from lab_1.utils import func
+
 
 class Person:
     def __init__(self, x: Chromosome, y: Chromosome, func_value: float):
@@ -9,6 +11,11 @@ class Person:
 
     def reduce_negative_func_value(self, min_value):
         self._func_value += 2 * abs(min_value)
+
+    def produce_new_people(self, other, k):
+        x1, x2 = self.x.full_cross(other.x, k)
+        y1, y2 = self.y.full_cross(other.y, k)
+        return Person(x1, y1, func(x1.encoded, y1.encoded)), Person(x2, y2, func(x2.encoded, y2.encoded))
 
     @property
     def x(self):
