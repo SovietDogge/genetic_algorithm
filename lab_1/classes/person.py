@@ -29,5 +29,11 @@ class Person:
     def func_value(self):
         return self._func_value
 
+    def __eq__(self, other):
+        return self.func_value == other.func_value
+
+    def __gt__(self, other):
+        return self.func_value < other.func_value
+
     def __repr__(self):
         return f'(x: {self.x}, y: {self.y}, value: {self.func_value})'

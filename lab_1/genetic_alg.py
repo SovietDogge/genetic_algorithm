@@ -41,8 +41,12 @@ def count_intervals_count(length: int) -> int:
 
 
 def main():
-    # example = Borders(-1, 2)
-    a_b, c_d = Border(-2, 4), Border(-4, 0)
+    # a_b, c_d = Border(-2, 4), Border(-4, 0)  # main func params
+    # l1, l2 = count_length(a_b), count_length(c_d)
+    # n1, n2 = count_intervals_count(l1), count_intervals_count(l2)
+    # h1, h2 = count_step(a_b, n1), count_step(c_d, n2)
+
+    a_b, c_d = Border(0, 4), Border(1, 2)  # example func params
     l1, l2 = count_length(a_b), count_length(c_d)
     n1, n2 = count_intervals_count(l1), count_intervals_count(l2)
     h1, h2 = count_step(a_b, n1), count_step(c_d, n2)
@@ -56,15 +60,15 @@ def main():
     population = []
     if None not in (h1, h2):
         for ind in points:
-            person = Person(x=Chromosome.create_chromosome(ind.left, a_b.left, h1),
-                            y=Chromosome.create_chromosome(ind.right, c_d.left, h2),
+            person = Person(x=Chromosome.create_chromosome(ind.left, a_b.left, h1, l1),
+                            y=Chromosome.create_chromosome(ind.right, c_d.left, h2, l2),
                             func_value=func(ind.left, ind.right))
             population.append(person)
 
         for _ in range(MIN_ITER_COUNT):
             min_func_value = min([person.func_value for person in population])
             if min_func_value < 0:
-                _ = [person.reduce_negative_func_value(min_func_value) for person in population]
+                [person.reduce_negative_func_value(min_func_value) for person in population]
             fit_func_sum = sum([person.func_value for person in population])
 
             points = np.array(sorted([(person.func_value / fit_func_sum) * 100 for person in population]))
@@ -78,19 +82,20 @@ def main():
             new_population_parents = generate_parents_population(circle, winners, population)
             rng.shuffle(new_population_parents)
 
-            new_population = []
+            print('Fitness sum: ', sum(person.func_value for person in population))
+            population.clear()
             k = rng.integers(1, min(l1, l2))
 
             for i in range(0, MIN_PERSON_COUNT // 2):
-                parent1 = new_population_parents.pop(i)
-                parent2 = new_population_parents.pop(i+1)
-                new_population.extend(parent1.produce_new_people(parent2, k))
+                parent1 = new_population_parents.pop(i % len(new_population_parents))
+                parent2 = new_population_parents.pop(i % len(new_population_parents))
+                population.extend(parent1.produce_new_people(parent2, k))
 
-
-        print(circle)
-        print(winners)
-        print(new_population_parents)
-        print(new_population)
+            best_person = sorted(population).pop(0)
+            decoded_x = a_b.left + best_person.x.encoded * h1
+            decoded_y = c_d.left + best_person.y.encoded * h2
+            print(f'Best point on iteration: x: {decoded_x}, y: {decoded_y}')
+# x = a+x*h.
 
 
 if __name__ == '__main__':
