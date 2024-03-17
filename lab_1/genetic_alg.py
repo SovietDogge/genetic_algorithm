@@ -3,9 +3,7 @@ from typing import List
 
 import numpy as np
 
-from classes import Person, Chromosome, func
-
-rng = np.random.default_rng(12)
+from classes import Person, Chromosome, func, rng
 
 Border = namedtuple('Border', ('left', 'right'))
 
@@ -30,7 +28,7 @@ def generate_parents_population(points: np.array, winners: np.array, population:
             if winners[i] < points[j]:
                 break
 
-        result.append(population[i])
+        result.append(population[j])
         k = int(j)
 
     return result
@@ -41,15 +39,15 @@ def count_intervals_count(length: int) -> int:
 
 
 def main():
-    # a_b, c_d = Border(-2, 4), Border(-4, 0)  # main func params
-    # l1, l2 = count_length(a_b), count_length(c_d)
-    # n1, n2 = count_intervals_count(l1), count_intervals_count(l2)
-    # h1, h2 = count_step(a_b, n1), count_step(c_d, n2)
-
-    a_b, c_d = Border(0, 4), Border(1, 2)  # example func params
+    a_b, c_d = Border(-2, 4), Border(-4, 0)  # main func params
     l1, l2 = count_length(a_b), count_length(c_d)
     n1, n2 = count_intervals_count(l1), count_intervals_count(l2)
     h1, h2 = count_step(a_b, n1), count_step(c_d, n2)
+
+    # a_b, c_d = Border(0, 4), Border(1, 2)  # example func params
+    # l1, l2 = count_length(a_b), count_length(c_d)
+    # n1, n2 = count_intervals_count(l1), count_intervals_count(l2)
+    # h1, h2 = count_step(a_b, n1), count_step(c_d, n2)
 
     points = []
     while len(points) < MIN_PERSON_COUNT:
@@ -68,34 +66,37 @@ def main():
         for _ in range(MIN_ITER_COUNT):
             min_func_value = min([person.func_value for person in population])
             if min_func_value < 0:
-                [person.reduce_negative_func_value(min_func_value) for person in population]
-            fit_func_sum = sum([person.func_value for person in population])
+                fitness_func_values = [person.reduce_negative_func_value(min_func_value) for person in population]
+            else:
+                fitness_func_values = [person.func_value for person in population]
 
-            points = np.array(sorted([(person.func_value / fit_func_sum) * 100 for person in population]))
+            fit_func_sum = sum(fitness_func_values)
+
+            points = np.array(sorted([(value / fit_func_sum) * 100 for value in fitness_func_values]))
             circle = np.zeros(MIN_PERSON_COUNT)
             for j, _ in enumerate(points):
                 circle[j] = sum(points[:j + 1])
-
-            winners = rng.random(50) * 100
+            # TODO: Хуйня с выбором победителя
+            winners = rng.random(MIN_PERSON_COUNT) * 100
             winners.sort()
+            population.sort()
 
             new_population_parents = generate_parents_population(circle, winners, population)
             rng.shuffle(new_population_parents)
 
-            print('Fitness sum: ', sum(person.func_value for person in population))
+            print('Fitness sum: ', sum(person.func_value for person in population) / MIN_PERSON_COUNT)
             population.clear()
             k = rng.integers(1, min(l1, l2))
 
             for i in range(0, MIN_PERSON_COUNT // 2):
-                parent1 = new_population_parents.pop(i % len(new_population_parents))
-                parent2 = new_population_parents.pop(i % len(new_population_parents))
-                population.extend(parent1.produce_new_people(parent2, k))
+                parent1 = new_population_parents.pop()
+                parent2 = new_population_parents.pop()
+                population.extend(parent1.produce_new_people(parent2, k, a_b.left, c_d.left, h1, h2))
 
-            best_person = sorted(population).pop(0)
-            decoded_x = a_b.left + best_person.x.encoded * h1
-            decoded_y = c_d.left + best_person.y.encoded * h2
+            best_person = sorted(population).pop()
+            decoded_x = Chromosome.decode_number(best_person.x.encoded, a_b.left, h1)
+            decoded_y = Chromosome.decode_number(best_person.y.encoded, c_d.left, h2)
             print(f'Best point on iteration: x: {decoded_x}, y: {decoded_y}')
-# x = a+x*h.
 
 
 if __name__ == '__main__':
