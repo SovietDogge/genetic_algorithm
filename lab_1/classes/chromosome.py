@@ -37,7 +37,9 @@ class Chromosome:
         binary = [self.bin_encoded[i] if i > k else chromosome.bin_encoded[i] for i in range(0, self.length)]
         return Chromosome(''.join(binary), self.length)
 
-    def full_cross(self, chromosome, k):
+    def full_cross(self, chromosome):
+        k = rng.integers(1, self.length)
+
         chr1 = self.cross(chromosome, k)
         chr2 = self.rcross(chromosome, k)
         return chr1, chr2

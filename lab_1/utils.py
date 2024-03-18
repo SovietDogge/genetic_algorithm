@@ -1,6 +1,6 @@
 import numpy as np
 
-rng = np.random.default_rng(2)
+rng = np.random.default_rng(1)
 
 
 def func(x, y):  # main

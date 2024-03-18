@@ -3,7 +3,8 @@ from typing import List
 
 import numpy as np
 
-from classes import Person, Chromosome, func, rng
+from classes import Person, Chromosome
+from lab_1.utils import func, rng
 
 Border = namedtuple('Border', ('left', 'right'))
 
@@ -65,37 +66,36 @@ def main():
 
         for _ in range(MIN_ITER_COUNT):
             min_func_value = min([person.func_value for person in population])
+            population.sort()
             if min_func_value < 0:
                 fitness_func_values = [person.reduce_negative_func_value(min_func_value) for person in population]
             else:
                 fitness_func_values = [person.func_value for person in population]
 
+            fitness_func_values.sort()
             fit_func_sum = sum(fitness_func_values)
 
-            points = np.array(sorted([(value / fit_func_sum) * 100 for value in fitness_func_values]))
+            points = np.array([(value / fit_func_sum) * 100 for value in fitness_func_values])
             circle = np.zeros(MIN_PERSON_COUNT)
             for j, _ in enumerate(points):
                 circle[j] = sum(points[:j + 1])
-            # TODO: Хуйня с выбором победителя
             winners = rng.random(MIN_PERSON_COUNT) * 100
             winners.sort()
-            population.sort()
 
             new_population_parents = generate_parents_population(circle, winners, population)
             rng.shuffle(new_population_parents)
 
             print('Fitness sum: ', sum(person.func_value for person in population) / MIN_PERSON_COUNT)
             population.clear()
-            k = rng.integers(1, min(l1, l2))
 
             for i in range(0, MIN_PERSON_COUNT // 2):
                 parent1 = new_population_parents.pop()
                 parent2 = new_population_parents.pop()
-                population.extend(parent1.produce_new_people(parent2, k, a_b.left, c_d.left, h1, h2))
+                population.extend(parent1.produce_new_people(parent2, a_b.left, c_d.left, h1, h2))
 
-            best_person = sorted(population).pop()
-            decoded_x = Chromosome.decode_number(best_person.x.encoded, a_b.left, h1)
-            decoded_y = Chromosome.decode_number(best_person.y.encoded, c_d.left, h2)
+            best_person_2 = sorted(population).pop()
+            decoded_x = Chromosome.decode_number(best_person_2.x.encoded, a_b.left, h1)
+            decoded_y = Chromosome.decode_number(best_person_2.y.encoded, c_d.left, h2)
             print(f'Best point on iteration: x: {decoded_x}, y: {decoded_y}')
 
 
