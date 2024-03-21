@@ -4,7 +4,7 @@ from typing import List
 import numpy as np
 
 from classes import Person, Chromosome
-from lab_1.utils import func, rng
+from lab_1.utils import func, rng, to_xlsx
 
 Border = namedtuple('Border', ('left', 'right'))
 
@@ -49,7 +49,7 @@ def main():
     # l1, l2 = count_length(a_b), count_length(c_d)
     # n1, n2 = count_intervals_count(l1), count_intervals_count(l2)
     # h1, h2 = count_step(a_b, n1), count_step(c_d, n2)
-
+    x_value, y_value, fit_value, adapt_value = [], [], [], []
     points = []
     while len(points) < MIN_PERSON_COUNT:
         ind = Border(rng.uniform(a_b.left, a_b.right), rng.uniform(c_d.left, c_d.right))
@@ -84,8 +84,19 @@ def main():
 
             new_population_parents = generate_parents_population(circle, winners, population)
             rng.shuffle(new_population_parents)
+            # print([person.func_value for person in population])
+            print('Adaptation sum: ', sum(person.func_value for person in population) / MIN_PERSON_COUNT)
 
-            print('Fitness sum: ', sum(person.func_value for person in population) / MIN_PERSON_COUNT)
+            best_person = sorted(population).pop()
+            decoded_x = Chromosome.decode_number(best_person.x.encoded, a_b.left, h1)
+            decoded_y = Chromosome.decode_number(best_person.y.encoded, c_d.left, h2)
+            print(f'Best point on iteration: x: {decoded_x}, y: {decoded_y}, fitness-value: {best_person.func_value}')
+
+            x_value.append(decoded_x)
+            y_value.append(decoded_y)
+            fit_value.append(best_person.func_value)
+            adapt_value.append(sum(person.func_value for person in population) / MIN_PERSON_COUNT)
+
             population.clear()
 
             for i in range(0, MIN_PERSON_COUNT // 2):
@@ -93,10 +104,7 @@ def main():
                 parent2 = new_population_parents.pop()
                 population.extend(parent1.produce_new_people(parent2, a_b.left, c_d.left, h1, h2))
 
-            best_person_2 = sorted(population).pop()
-            decoded_x = Chromosome.decode_number(best_person_2.x.encoded, a_b.left, h1)
-            decoded_y = Chromosome.decode_number(best_person_2.y.encoded, c_d.left, h2)
-            print(f'Best point on iteration: x: {decoded_x}, y: {decoded_y}')
+    to_xlsx(x=x_value, y=y_value, fit_value=fit_value, adapt_value=adapt_value)
 
 
 if __name__ == '__main__':
